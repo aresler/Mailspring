@@ -16,6 +16,8 @@ import { ChangeUnreadTask } from './flux/tasks/change-unread-task';
 import { ChangeFolderTask } from './flux/tasks/change-folder-task';
 import { ChangeStarredTask } from './flux/tasks/change-starred-task';
 import { ChangeLabelsTask } from './flux/tasks/change-labels-task';
+import NativeNotifications from './native-notifications';
+import SoundRegistry from './registries/sound-registry';
 import { Message } from 'mailspring-exports';
 let MailRulesStore: typeof import('./flux/stores/mail-rules-store').default = null;
 type MailRule = import('./flux/stores/mail-rules-store').MailRule;
@@ -77,6 +79,29 @@ const MailRulesActions: {
       threads: [thread],
       source: 'Mail Rules',
     });
+  },
+
+  notify: (message, thread) => {
+    if (AppEnv.config.get('core.notifications.sounds')) {
+      SoundRegistry.playSound('new-mail');
+    }
+    const from = message.from[0] ? message.from[0].displayName() : 'Unknown';
+    NativeNotifications.displayNotification({
+      title: from,
+      subtitle: message.subject || undefined,
+      body: message.snippet || undefined,
+      tag: `thread-${thread.id}`,
+      threadId: thread.id,
+      messageId: message.id,
+      onActivate: ({ activationType }) => {
+        if (activationType === 'clicked') {
+          AppEnv.displayWindow();
+          Actions.ensureCategoryIsFocused('inbox', thread.accountId);
+          Actions.setFocus({ collection: 'thread', item: thread });
+        }
+      },
+    });
+    return undefined;
   },
 
   forward: (message, thread, value) => {

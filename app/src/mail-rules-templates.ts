@@ -107,6 +107,7 @@ export const ActionTemplates = [
   new Template('markAsRead', Template.Type.None, { name: localized('Mark as Read') }),
   new Template('moveToTrash', Template.Type.None, { name: localized('Move to Trash') }),
   new Template('star', Template.Type.None, { name: localized('Star') }),
+  new Template('notify', Template.Type.None, { name: localized('Send Notification') }),
   new Template('forward', Template.Type.InputString, {
     name: localized('Forward'),
     valueLabel: 'to:',
